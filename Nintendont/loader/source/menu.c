@@ -2033,8 +2033,14 @@ void PrintBuildInfo(void)
 		const char *g = strstr(NIN_GIT_VERSION, "-g");
 		strncpy(rev, g ? g + 2 : NIN_GIT_VERSION, g ? 7 : 10);
 	}
+#ifdef SLIPPWII_BUILD_LABEL
+	// A build that is not a release says so (loader/Makefile, BUILD_LABEL)
+	#define SHOWN_VERSION SLIPPWII_VERSION " " SLIPPWII_BUILD_LABEL
+#else
+	#define SHOWN_VERSION SLIPPWII_VERSION
+#endif
 	PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X, MENU_POS_Y + 20*0,
-		"[SlippWii %s][IOS%u v%u]", SLIPPWII_VERSION,
+		"[SlippWii %s][IOS%u v%u]", SHOWN_VERSION,
 		*(vu16*)0x80003140, *(vu16*)0x80003142);
 	PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X, MENU_POS_Y + 20*1,
 		"Built   : " __DATE__ " " __TIME__ " %s", rev);

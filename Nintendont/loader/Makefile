@@ -37,6 +37,12 @@ CFLAGS	:= -O3 -g -std=gnu89 -Wno-format-truncation \
 	   -Wall $(MACHDEP) $(INCLUDE) \
 	   -DNIN_GIT_VERSION=\"$(GIT_VERSION)\" \
 	   -DDEBUG -DDEBUG_MODULE_PATCH -DARCH_IS_BIG_ENDIAN
+# A label shown after the version on the menu's first line, for builds that are not a release
+# ("make BUILD_LABEL=DEV"). Keep it short: that line has room for about 41 characters.
+# Only what is shown changes: the version Check for Updates and matchmaking use stays as it is.
+ifneq ($(BUILD_LABEL),)
+CFLAGS	+= -DSLIPPWII_BUILD_LABEL=\"$(BUILD_LABEL)\"
+endif
 CXXFLAGS := $(CFLAGS)
 
 # NOTE: Do NOT change to := - needed for proper expansion of $(CURDIR) later.
