@@ -1,11 +1,17 @@
-Your Slippi account goes in this folder, as user.json.
+Your Slippi account goes in this folder: in accounts/ (one file each, so
+several people can keep theirs on one card), and as user.json for the one
+signed in.
 
 Easiest (Windows): double-click "Copy my Slippi account to SD.bat" at the top
-of this SD card. It copies the account Slippi Launcher on your PC is logged in to.
+of this SD card. It saves the account Slippi Launcher on your PC is logged in
+to, with the connect codes you played in Direct, and signs in with it if
+nobody is signed in. Run it on each PC to add each person's account.
 
-By hand: copy user.json from Slippi Launcher's files into this folder.
+By hand: copy user.json from Slippi Launcher's files into slippwii/accounts/
+(any name ending in .json), then sign in on the Wii: Settings (B on the game
+list) > Slippi Settings > Slippi Account.
   Windows: %APPDATA%\Slippi Launcher\netplay\User\Slippi\user.json
   macOS / Linux: search Slippi Launcher's folder for user.json
   (see https://github.com/2gifts/SlippWii#your-slippi-account)
 
-user.json is your Slippi login: keep it private, don't share it.
+Each of these files is a Slippi login: keep the card private, don't share it.

@@ -37,6 +37,8 @@ includes have been generated.
 | `tools/ppc/` | The crash reporter and diagnostics (PowerPC assembly) |
 | `tools/rollback/` | The savestate engine for rollback on the Wii ([ROLLBACK.md](ROLLBACK.md)) |
 | `Nintendont/loader/source/slippwii.c`, `vcdiff.c` | Before Melee starts: the account check, and Slippi's menu patches applied to the disc (first start) |
+| `Nintendont/loader/source/accounts.c` | The Slippi accounts saved on the card: the header's *Account* line, *Slippi Account* (sign in, sign out, forget), and who plays when nobody is signed in |
+| `tools/test_loader_accounts.py`, `tools/test_copy_account.py` | The accounts on a PC (fake SD and USB folders, scripted buttons), and the account-copy script (needs PowerShell) |
 | `release/` | What goes on the SD card besides the app: the Homebrew Channel icon and `meta.xml`, the account-copy script |
 | `tools/slippi_files.py` | Slippi's pinned files; `netplay.gct`, and a PC-side patcher for development |
 | `tools/slippi_version.py` | Which Slippi the checkout builds for: 3.6.4, or the version after it ([NEXT_SLIPPI.md](NEXT_SLIPPI.md)) |
@@ -61,6 +63,8 @@ python tools/online_selftest.py pc --game --rollback 2          # the same, roll
 python tools/rollback/test/run.py                               # the savestate engine vs a simulated Wii
 python tools/test_update.py [--live]                            # the updater's core (--live: a download from GitHub)
 python tools/test_loader_slippwii.py --iso Melee.iso --zip dist/SlippWii-vX.zip   # the loader's file making, on a PC
+python tools/test_loader_accounts.py                            # the accounts: sign in, out, forget, the codes with them
+python tools/test_copy_account.py                               # the account-copy script (PowerShell; pwsh on macOS/Linux)
 python tools/test_hsd_links.py --iso Melee.iso                  # the next Slippi's linked files, C and Python
 python tools/online_selftest.py pc --next-mm                    # matchmaking as after 3.6.4 (WebSocket, TLS, STUN)
 ```

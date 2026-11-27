@@ -13,8 +13,8 @@ The zip mirrors the SD card (extract it onto the card):
                                       source/slippwii.c); nothing of Melee's is shipped
     slippwii/patches/manifest.txt     what each file must be (size, CRC-32): the patches
                                       carry no checksums of their own
-    Copy my Slippi account to SD.bat  copies user.json from Slippi Launcher (slippwii/
-                                      copy-account.ps1)
+    Copy my Slippi account to SD.bat  saves the Slippi Launcher account in slippwii/
+                                      accounts/ (slippwii/copy-account.ps1)
 
 The Slippi files come from Project Slippi's GitHub (pinned in
 tools/slippi_files.py). --iso is your own NTSC 1.02 disc: the manifest needs
@@ -64,6 +64,8 @@ put it where Nintendont finds it, e.g. SD:/games/), and a Slippi account
    folders; nothing else is changed).
 2. Double-click "Copy my Slippi account to SD.bat" on the SD card. It copies
    your Slippi login from Slippi Launcher. (macOS/Linux: see the README online.)
+   Sharing the Wii? Run it on each person's PC: on the Wii, Settings >
+   Slippi Settings > Slippi Account switches between them.
 3. Put the card in the Wii, start SlippWii from the Homebrew Channel and pick
    Melee. The first start takes a minute: SlippWii makes Slippi's online menus
    from your disc. Then: Online Play > Direct or Unranked.

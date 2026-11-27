@@ -101,10 +101,30 @@ Slippi Launcher keeps your login in a file named `user.json`; SlippWii needs a c
   Linux, look for `user.json` in Slippi Launcher's application folder.
 
 If the account is missing or damaged, SlippWii says so on the TV before Melee starts, and explains
-how to fix it. When it is fine, the start-up screen shows *Slippi account: your name (your code)*.
+how to fix it. Every SlippWii screen shows who is signed in at the top: *Account : your name (your
+code)* in green, or in red when nobody is.
 
 **Treat `user.json` like a password:** anyone with it can play as you. Don't share it, and don't
 post your SD card's files online.
+
+### Several accounts on one Wii
+
+Each account saved on the card is a file in `slippwii/accounts/`, and the one signed in is
+`slippwii/user.json`. To add one, run `Copy my Slippi account to SD.bat` on that person's PC (it
+also brings the connect codes they played in Direct and Teams), or copy their `user.json` into
+`slippwii/accounts/` with any name ending in `.json`.
+
+On the Wii, press **B** on the game list, go to the *Slippi Settings* page and pick **Slippi
+Account**:
+
+- **A** signs in with the account picked. The one signed in before stays saved, with its codes.
+- **X** signs out: online play is off until someone signs in. The account stays saved.
+- **Y** forgets the account picked, after asking: its file is deleted from the card (and the USB
+  drive). To sign in with it again, copy it from a PC.
+
+Each account keeps its own recent connect codes for Direct and Teams. When accounts are saved and
+nobody is signed in, starting Melee asks who is playing (**B**: nobody, then Melee can start
+without online play).
 
 ## Play
 
@@ -127,6 +147,7 @@ On the *Slippi Settings* page:
 | Setting | What it does |
 |---|---|
 | **Check for Updates** | Looks for a newer SlippWii and installs it (see *Updating*). |
+| **Slippi Account** | Who is signed in, and the accounts saved on the card: sign in, sign out, forget (see *Several accounts on one Wii*). |
 | **No Music** | Turns the game's music off, in the menus and in matches. Sound effects stay. |
 | **Quick Chat** | Slippi's quick chat, with Slippi Dolphin's three choices: **Yes**, **Direct** (in Direct only) or **No**. |
 | **Team Indicators** | In online games your own character's tag says YOU, and in Teams your teammates keep their marker. |
@@ -148,7 +169,8 @@ On the SD card:
 | Path | What |
 |---|---|
 | `apps/SlippWii/` | The app (Homebrew Channel) |
-| `slippwii/user.json` | Your Slippi account (keep it private) |
+| `slippwii/user.json` | The Slippi account signed in (keep it private) |
+| `slippwii/accounts/` | The Slippi accounts saved on the card, each with its Direct and Teams codes (keep them private) |
 | `slippwii/netplay.gct`, `slippwii/files/`, `slippwii/patches/` | Slippi's online code, menu files and patches |
 | `slippwii/logs/` | Problem reports and logs (see *Reporting problems*) |
 | `slippwii_nincfg.bin` | SlippWii's settings (Slippi Nintendont uses `slippi_nincfg.bin`) |
@@ -160,6 +182,8 @@ If your games are on a USB drive, SlippWii copies what it needs to `slippwii/` o
 SlippWii checks everything before Melee starts and explains any problem on the TV. The common ones:
 
 - **"No Slippi account on the SD card":** run `Copy my Slippi account to SD.bat` (see above).
+- **"Account : none" at the top:** nobody is signed in. Pick one in *Slippi Settings > Slippi
+  Account*, or add one (see *Several accounts on one Wii*).
 - **"Could not make Slippi's online menus":** your Melee disc image isn't an unmodified NTSC 1.02
   copy (GALE01 revision 2), or SlippWii's files are incomplete: extract the zip onto the card again.
   Slippi needs the same vanilla 1.02 image.
