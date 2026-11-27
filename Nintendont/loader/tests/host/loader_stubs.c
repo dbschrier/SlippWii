@@ -1,5 +1,7 @@
 /* See loader_stubs.h. main() runs SlippWii_Prepare once and prints what
- * it left: the config's networking bit and the account line. */
+ * it left: the config's networking bit and the account line. (Built with
+ * SW_NO_MAIN, the stand-ins only: tests/host/accounts_main.c has its own.) */
+#include <dirent.h>
 #include <stdarg.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -13,7 +15,9 @@
 static NIN_CFG cfg;
 NIN_CFG *ncfg = &cfg;
 FATFS *devices[2];
+#ifndef SW_NO_MAIN
 static FATFS present;
+#endif
 u32 Shutdown;
 static const char *answers;
 static int last_y = -1;
@@ -79,6 +83,67 @@ FRESULT f_mkdir_char(const char *path)
 	return FR_OK;
 }
 
+FRESULT f_opendir_char(DIR *dp, const char *path)
+{
+	char p[1024];
+	real_path(p, sizeof(p), path);
+	dp->dir = opendir(p);
+	return dp->dir ? FR_OK : FR_NO_FILE;
+}
+
+/* (sorted by nothing, as FAT's own order isn't: tests mustn't count on one) */
+FRESULT f_readdir(DIR *dp, FILINFO *info)
+{
+	struct dirent *e;
+	size_t i;
+	do
+		e = readdir(dp->dir);
+	while (e && (!strcmp(e->d_name, ".") || !strcmp(e->d_name, "..")));
+	memset(info, 0, sizeof(*info));
+	if (!e)
+		return FR_OK;
+	for (i = 0; i + 1 < 256 && e->d_name[i]; i++)
+		info->fname[i] = (unsigned char)e->d_name[i];
+	info->fattrib = e->d_type == DT_DIR ? AM_DIR : 0;
+	return FR_OK;
+}
+
+FRESULT f_closedir(DIR *dp)
+{
+	closedir(dp->dir);
+	return FR_OK;
+}
+
+static void narrow(const WCHAR *w, char *out, size_t size)
+{
+	size_t i;
+	for (i = 0; i + 1 < size && w[i]; i++)
+		out[i] = (char)w[i];
+	out[i] = '\0';
+}
+
+FRESULT f_unlink(const WCHAR *path)
+{
+	char a[1024], p[1024];
+	narrow(path, a, sizeof(a));
+	real_path(p, sizeof(p), a);
+	return remove(p) == 0 ? FR_OK : FR_NO_FILE;
+}
+
+/* As FatFs: no replacing a file that is there. */
+FRESULT f_rename(const WCHAR *from, const WCHAR *to)
+{
+	char a[1024], b[1024], pa[1024], pb[1024];
+	struct stat st;
+	narrow(from, a, sizeof(a));
+	narrow(to, b, sizeof(b));
+	real_path(pa, sizeof(pa), a);
+	real_path(pb, sizeof(pb), b);
+	if (stat(pb, &st) == 0)
+		return FR_DISK_ERR;
+	return rename(pa, pb) == 0 ? FR_OK : FR_DISK_ERR;
+}
+
 const char *GetRootDevice(void)
 {
 	return getenv("SW_GAME_DEV");
@@ -138,6 +203,8 @@ static int pressed(char want)
 {
 	if (++frames < 40)
 		return 0;
+	if (!answers)
+		answers = getenv("SW_ANSWERS");
 	if (!answers || !*answers) {
 		printf("ERROR: a question with no answer left\n");
 		exit(4);
@@ -151,6 +218,10 @@ static int pressed(char want)
 }
 int FPAD_OK(int lock) { (void)lock; return pressed('A'); }
 int FPAD_Cancel(int lock) { (void)lock; return pressed('B'); }
+int FPAD_X(int lock) { (void)lock; return pressed('X'); }
+int FPAD_Y(int lock) { (void)lock; return pressed('Y'); }
+int FPAD_Up(int lock) { (void)lock; return pressed('U'); }
+int FPAD_Down(int lock) { (void)lock; return pressed('D'); }
 void LoaderShutdown(void) { exit(5); }
 void ExitToLoader(int ret)
 {
@@ -159,6 +230,7 @@ void ExitToLoader(int ret)
 }
 void FlushDevices(void) {}
 
+#ifndef SW_NO_MAIN
 int main(int argc, char **argv)
 {
 	unsigned cmd = argc > 2 ? (unsigned)strtoul(argv[2], NULL, 0) : 0;
@@ -174,3 +246,4 @@ int main(int argc, char **argv)
 	printf("RESULT network=%d account=%s\n", (cfg.Config & NIN_CFG_NETWORK) ? 1 : 0, SlippWii_AccountLine);
 	return 0;
 }
+#endif

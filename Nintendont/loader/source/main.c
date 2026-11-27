@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "FPad.h"
 #include "menu.h"
 #include "update.h"
+#include "accounts.h"
 #include "MemCard.h"
 #include "Patches.h"
 #include "kernel_zip.h"
@@ -746,6 +747,9 @@ int main(int argc, char **argv)
 	{
 		// Load titles.txt.
 		LoadTitles();
+
+		// Who is signed in to Slippi, for the header of every screen (accounts.c)
+		Accounts_Load();
 
 		// Load Nintendont configuration file
 		if (LoadNinCFG() == false)

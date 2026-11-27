@@ -1,7 +1,7 @@
 """Runs the loader's SlippWii start-up (Nintendont/loader/source/slippwii.c)
 on a PC, against the release zip's files on fake SD/USB folders: every disc
 format, games on SD or USB, missing or broken accounts, a wrong disc,
-incomplete files and the second start; and SlippWii's own changes to the
+incomplete files and the second start, saved accounts with nobody signed in; and SlippWii's own changes to the
 files it has made (tools/menu_edits.py): made once, and only to Slippi's bytes. The loader's libogc/FatFS/screen
 calls are stand-ins (Nintendont/loader/tests/host/); the screen is printed.
 
@@ -141,7 +141,7 @@ def main():
         host = LOADER / 'tests/host'
         subprocess.run([*args.cc.split(), '-Wall', '-Werror', '-O1', '-I', str(host / 'include'), '-I', str(host),
                         '-I', str(LOADER / 'include'), '-I', str(LOADER / 'source'), str(host / 'loader_stubs.c'),
-                        str(LOADER / 'source/slippwii.c'), str(LOADER / 'source/vcdiff.c'),
+                        str(LOADER / 'source/slippwii.c'), str(LOADER / 'source/accounts.c'), str(LOADER / 'source/vcdiff.c'),
                         str(LOADER / 'source/hsd_links.c'), '-o', str(exe)], check=True)
         ciso = tmp / 'melee.ciso'
         make_ciso(iso, ciso)
@@ -243,6 +243,25 @@ def main():
             code, out = run('/games/melee.iso', sd, answers='A')
             expect('is not a Slippi account' in out and 'RESULT network=0' in out, 'not explained', out)
         case('a broken user.json: explained', bad_account)
+
+        def saved_accounts(answers):
+            def t():
+                sd = card(f'saved{answers}', account=None)
+                (sd / 'slippwii/accounts').mkdir(parents=True)
+                (sd / 'slippwii/accounts/TEST-001.json').write_bytes(ACCOUNT)
+                link_or_copy(iso, sd / 'games/melee.iso')
+                code, out = run('/games/melee.iso', sd, answers=answers)
+                expect('Who is playing?' in out and 'TEST#001' in out, 'the saved accounts were not offered', out)
+                if answers == 'A':
+                    expect(code == 0 and 'RESULT network=1 account=Slippi account: Test Wii (TEST#001)' in out,
+                           'A: not signed in', out)
+                    expect((sd / 'slippwii/user.json').read_bytes() == ACCOUNT, 'A: user.json not written')
+                else:
+                    expect(code == 0 and 'No Slippi account is signed in.' in out and 'RESULT network=0' in out,
+                           'B, then A: not offline', out)
+            return t
+        case('saved accounts, nobody signed in, A: the account picked is signed in', saved_accounts('A'))
+        case('saved accounts, nobody signed in, B then A: Melee starts without online play', saved_accounts('BA'))
 
         def ciso_case():
             sd = card('ciso')

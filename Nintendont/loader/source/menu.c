@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "FPad.h"
 #include "Config.h"
 #include "update.h"
+#include "accounts.h"
 #include "titles.h"
 #include "dip.h"
 #include <stdio.h>
@@ -170,6 +171,17 @@ static const char *desc_update[] = {
 	"Needs the wired LAN adapter.",
 	"Your account and your settings",
 	"are kept.",
+	NULL
+};
+static const char *desc_account[] = {
+	"Press A: who is signed in to",
+	"Slippi on this Wii, and the",
+	"accounts saved on the card.",
+	"",
+	"Sign in with one, sign out, or",
+	"forget one. To add one, copy",
+	"its user.json from a PC into",
+	"slippwii/accounts/.",
 	NULL
 };
 static const char *desc_slippi_replays[] = {
@@ -1051,6 +1063,8 @@ static const char *const *GetSettingsDescription(const MenuCtx *ctx)
 		switch (ctx->settings.posX) {
 		case NIN_SLIPPI_UPDATE:
 			return desc_update;
+		case NIN_SLIPPI_ACCOUNT:
+			return desc_account;
 		case NIN_SLIPPI_QUICK_CHAT:
 			return (const char *const *)desc_sw_quick_chat;
 		case NIN_SLIPPI_REPLAYS: 
@@ -1351,6 +1365,9 @@ static void Menu_Settings_InputHandler(MenuCtx *ctx)
 				ctx->saveSettings = false;
 				SlippWii_Update();
 				break;
+			case NIN_SLIPPI_ACCOUNT:
+				Accounts_Menu();
+				break;
 			case NIN_SLIPPI_QUICK_CHAT:
 				// Yes (no bit), Direct, No, and Yes again
 				if (ncfg->Config & NIN_CFG_SW_NO_CHAT)
@@ -1544,6 +1561,11 @@ static void Menu_Settings_Redraw(MenuCtx *ctx)
 		// SlippWii's updater (update.c): an action
 		PrintFormat(MENU_SIZE, BLACK, MENU_POS_X + SETTINGS_X_START, SettingY(ListLoopIndex),
 				"%-18s", "Check for Updates");
+		ListLoopIndex++;
+
+		// The Slippi accounts on the card (accounts.c): an action
+		PrintFormat(MENU_SIZE, BLACK, MENU_POS_X + SETTINGS_X_START, SettingY(ListLoopIndex),
+				"%-18s", "Slippi Account");
 		ListLoopIndex++;
 
 		// Slippi Replays
@@ -2038,6 +2060,12 @@ void PrintBuildInfo(void)
 		*(vu16*)0x80003140, *(vu16*)0x80003142);
 	PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X, MENU_POS_Y + 20*1,
 		"Built   : " __DATE__ " " __TIME__ " %s", rev);
+
+	// Who is signed in to Slippi (accounts.c), on every screen from the start
+	u32 accountColor;
+	const char *account = Accounts_HeaderLine(&accountColor);
+	if (account[0])
+		PrintFormat(DEFAULT_SIZE, accountColor, MENU_POS_X, MENU_POS_Y + 20*2, "%s", account);
 }
 
 /**

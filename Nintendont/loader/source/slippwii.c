@@ -37,6 +37,7 @@
 #include "hsd_links.h"
 #include "slippwii.h"
 #include "slippwii_edits.h"
+#include "accounts.h"
 
 extern FATFS *devices[2];
 extern u32 Shutdown;	/* menu.c */
@@ -410,55 +411,12 @@ static u8 *disc_file(Disc *d, const char *name, u32 *size)
 
 /* ---- the account ------------------------------------------------------------------ */
 
-/* A JSON string field's value, printable ASCII only (others shown as '?'). */
-static int json_string(const char *json, const char *key, char *out, size_t size)
-{
-	char pattern[40];
-	const char *p;
-	size_t n = 0;
-	snprintf(pattern, sizeof(pattern), "\"%s\"", key);
-	p = strstr(json, pattern);
-	if (!p)
-		return 0;
-	p += strlen(pattern);
-	while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n' || *p == ':')
-		p++;
-	if (*p++ != '"')
-		return 0;
-	while (*p && *p != '"' && n + 1 < size) {
-		unsigned char c = (unsigned char)*p++;
-		if (c == '\\' && *p)
-			c = (unsigned char)*p++;
-		if (c >= 0x80) {
-			while ((*p & 0xC0) == 0x80)
-				p++;	/* the rest of a UTF-8 character */
-			c = '?';
-		} else if (c < 0x20) {
-			c = '?';
-		}
-		out[n++] = (char)c;
-	}
-	out[n] = '\0';
-	return n > 0;
-}
-
 /* 1: a Slippi account (name, code filled in), 0: no file, -1: not one. */
 static int read_account(const char *dev, char *name, char *code)
 {
-	char path[64], key[8];
-	u32 n;
-	char *json;
-	int ok;
+	char path[64];
 	path_of(path, sizeof(path), dev, "user.json");
-	json = (char *)load(path, &n);
-	if (!json)
-		return 0;
-	ok = json_string(json, "uid", key, sizeof(key)) && json_string(json, "playKey", key, sizeof(key)) &&
-	     json_string(json, "connectCode", code, 16);
-	if (ok && !json_string(json, "displayName", name, 24))
-		strcpy(name, "?");
-	free(json);
-	return ok ? 1 : -1;
+	return Accounts_ReadFile(path, name, code, NULL);
 }
 
 static void account_help(void)
@@ -484,6 +442,20 @@ static void check_account(void)
 	if (state == 1) {
 		snprintf(SlippWii_AccountLine, sizeof(SlippWii_AccountLine), "Slippi account: %s (%s)", name, code);
 		return;
+	}
+	if (state == 0) {
+		/* accounts saved on the card, nobody signed in: who is playing (accounts.c) */
+		int picked = Accounts_PickAtStart();
+		if (picked > 0) {
+			check_account();	/* (signed in now: the same as above) */
+			return;
+		}
+		if (picked < 0) {
+			screen_clear();
+			say(BLACK, "No Slippi account is signed in.");
+			ask_offline_or_exit();
+			return;
+		}
 	}
 	screen_clear();
 	if (state == 0) {

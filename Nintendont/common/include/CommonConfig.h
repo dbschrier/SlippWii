@@ -118,6 +118,7 @@ enum ninextrasettings
 enum ninslippisettings
 {
 	NIN_SLIPPI_UPDATE,		// "Check for Updates" (loader/source/update.c): an action, not a setting
+	NIN_SLIPPI_ACCOUNT,		// "Slippi Account" (loader/source/accounts.c): an action, not a setting
 	NIN_SLIPPI_REPLAYS,		// (no "Slippi Networking" row since 1.6.1: SlippWii has it on, always)
 	NIN_SLIPPI_REPLAYS_LED,
 	NIN_SLIPPI_PORT_A,
